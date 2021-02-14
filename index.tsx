@@ -1,11 +1,31 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { render } from 'react-dom';
-import Hello from './Hello';
-import './style.css';
+import {useDomRect} from "powerhooks/useDomRect";
+
+
 
 const App = ()=>{
+
+  const {
+    ref: textareaRef,
+    "domRect": {
+      width: textareaWidth,
+      height: textareaHeight
+    }
+  } = useDomRect();
+
   return(
     <div>
+
+      <h1>useDomRect</h1>
+
+
+      <textarea ref={textareaRef} placeholder={`${textareaWidth} * ${textareaHeight}`}/>
+
+
+
+      
+
       
     </div>
   )
