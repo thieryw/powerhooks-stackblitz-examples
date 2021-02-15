@@ -3,8 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
+    "@types/memoizee": "^0.4.5",
     "@types/react": "^16.8.2",
     "@types/react-dom": "^16.8.0",
+    "evt": "^1.9.12",
+    "memoizee": "^0.4.15",
     "powerhooks": "^0.0.8",
     "react": "^16.8.0",
     "react-dom": "^16.8.0"

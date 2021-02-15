@@ -1,6 +1,6 @@
 import React,{ useState, useCallback, useEffect, memo } from 'react';
 import { render } from 'react-dom';
-import {useCallbackFactory} from "powerhooks/useCallbackFactory";
+import {useCallbackFactory} from "./useCallbackFactory";
 import { useConstCallback } from "powerhooks/useConstCallback";
 
 type Props= {
@@ -8,6 +8,7 @@ type Props= {
   task: string;
   onClick(action: "DELETE" | "EDIT", task: string): void;
 };
+
 
 const Item= memo((props: Props)=>{
 
