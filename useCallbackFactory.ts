@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
-import memoize from "memoizee";
+//import memoize from "memoizee";
 import { id } from "evt/tools/typeSafety/id";
+
+const memoize: any = function(){};
 
 export type CallbackFactory<FactoryArgs extends any[],Args0 extends any[],R> = (...factoryArgs: FactoryArgs) => (...args: Args0) => R
 
