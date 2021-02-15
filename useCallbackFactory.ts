@@ -2,28 +2,18 @@ import { useRef, useState } from "react";
 import * as memoize from "memoizee";
 import { id } from "evt/tools/typeSafety/id";
 
-export type CallbackFactory<FactoryArgs extends unknown[],Args0 extends unknown[],R> = (...factoryArgs: FactoryArgs) => (...args: Args0) => R
+export type CallbackFactory<FactoryArgs extends any[],Args0 extends any[],R> = (...factoryArgs: FactoryArgs) => (...args: Args0) => R
 
-/**
- *  const callbackFactory= useCallbackFactory(
- *      ([key]: [string], [params]: [{ foo: number; }]) => {    
- *          ...
- *      },
- *      []
- *  );
- * 
- * WARNING: Factory args should not be of variable length.
- * 
- */
+
 export function useCallbackFactory<
-    FactoryArgs extends unknown[],
-    Args extends unknown[],
+    FactoryArgs extends any[],
+    Args0 extends any[],
     R = void
 >(
-    callback: (...callbackArgs: [FactoryArgs, Args]) => R
-): CallbackFactory<FactoryArgs, Args, R> {
+    callback: (...callbackArgs: [FactoryArgs, Args0]) => R
+): CallbackFactory<FactoryArgs, Args0, R> {
 
-    type Out = CallbackFactory<FactoryArgs, Args, R>;
+    type Out = CallbackFactory<FactoryArgs, Args0, R>;
 
     const callbackRef = useRef<typeof callback>(callback);
 
@@ -39,7 +29,7 @@ export function useCallbackFactory<
 
                     memoizedRef.current = memoize(
                         (...factoryArgs: FactoryArgs) =>
-                            (...args: Args) =>
+                            (...args: Args0) =>
                                 callbackRef.current(factoryArgs, args),
                         { "length": factoryArgs.length }
                     );
