@@ -1,99 +1,135 @@
-import React,{ useState, useCallback, useEffect, memo } from 'react';
-import { render } from 'react-dom';
-import {useCallbackFactory} from "powerhooks/useCallbackFactory";
-import { useConstCallback } from "powerhooks/useConstCallback";
+import {useCallbackFactory} from "powerhooks";
+import React, {useState, memo, useCallback} from "react";
 
-
-type Props= {
-  priority: number;
-  task: string;
-  onClick(action: "DELETE" | "EDIT", task: string): void;
-};
-
-
-const Item= memo((props: Props)=>{
-
-
-  const { priority, task, onClick} = props;
-
-  console.log(`render ${task}`);
-
-  const onEditClick = useConstCallback(()=> onClick("EDIT", task));
-  const onDeleteClick = useConstCallback(()=> onClick("DELETE", task));
-
-  return (
-    <div>
-      <h1>Priority: {priority}: {task}</h1>
-      <button onClick={onEditClick}>EDIT</button>
-      <button onClick={onDeleteClick}>DELETE</button>
-    </div>
-  )
-
-});
-
-//====================
-
-
-const App = ()=>{
-
-  const [todos, setTodos] = useState<{ priority: number; task: string; }[]>(
-    [
-      { "priority": 8, "task": "Fuck my phather" },
-      { "priority": 9, "task": "Drink water" }
-    ]
-  );
-
-  useEffect(
-    ()=>{
-
-      setTimeout(
-        ()=> {
-
-          console.log("================About to add a item...")
-
-          setTodos(todos=> [...todos, { "priority": 3, "task": "Empty trash" }]);
-
-        },
-        5000
-      );
-
-
-    },
-    []
-  );
-
-  /*
-  const onClick = useCallback(
-    (action: "DELETE" | "EDIT", task: string)=> {
-      alert(`Click on "${task}", action requested: ${action}`)
-    },
-    []
-  );
-  */
-
-  const onClickFactory = useCallbackFactory(
-    (
-      [task, priority]: [string, number], 
-      [action]: Parameters<Props["onClick"]>
-    )=> alert(`Click on "${task}${priority}", action requested: ${action}`)
-  );
-
-  return(
-    <div>
-    {
-      todos.map(({ priority, task })=> 
-        <Item
-          key={task}
-          priority={priority}
-          task={task}
-          onClick={onClickFactory(task, priority)}
-        />
-      )
-    }  
-    </div>
-  )
+type Task = {
+    description: string;
+    isInEditingState: boolean;
 }
 
-render(<App />, document.getElementById('root'));
+export const UseCallbackFactoryExample = ()=>{
+
+    const [tasks, setTasks] = useState<Task[]>(
+        [
+            {
+                "description": "piano practice",
+                "isInEditingState": false
+            },
+
+            {
+                "description": "clean the house",
+                "isInEditingState": false
+            }
+        ]
+    );
+
+    const onClickFactory = useCallbackFactory(([taskIndex]: [number])=>{
+
+        if(tasks[taskIndex].isInEditingState){
+            return;
+        }
+
+        setTasks((
+            tasks[taskIndex].isInEditingState = true,
+            [...tasks]
+        ))
+
+    });
+
+
+    const onEditTaskFactory = useCallbackFactory(
+        (
+            [taskIndex]: [number],
+            [params]: [{
+                newDescription: string;
+            }]
+        )=>{
+            const {newDescription} = params;
+
+            setTasks((
+                tasks[taskIndex].description = newDescription,
+                tasks[taskIndex].isInEditingState = false,
+                [...tasks]
+            ));
+        }
+    );
+
+
+
+
+
+    return(
+        <div>
+            <h1>UseCallbackFactory Example:</h1>
+            <ul>
+                {
+                    tasks.map(
+                        (task, index)=> 
+                        <TaskComponent 
+                            description={task.description} 
+                            isInEditingState={task.isInEditingState} 
+                            onClick={onClickFactory(index)}
+                            onEditTask={onEditTaskFactory(index)}
+                            key={`${task.description}+${index}`}
+                        />
+                    )
+                }
+            </ul>
+        </div>
+    )
+}
+
+
+const {TaskComponent} = (()=>{
+    type Props = Task & {
+        onClick(): void;
+        onEditTask(
+            params: {
+                newDescription: string;
+            }
+        ): void;
+    };
+
+    const TaskComponent = memo((props: Props)=>{
+
+
+        const {description, isInEditingState, onClick, onEditTask} = props;
+        const [textInput, setTextInput] = useState("");
+
+
+        console.log(`render ${description}`);
+
+        const onChange= useCallback((e: React.ChangeEvent<HTMLInputElement>)=>{
+            setTextInput(e.target.value);
+        },[])
+
+        const onSubmit = useCallback((e: React.FormEvent<HTMLFormElement>)=>{
+            if(textInput === ""){
+                return;
+            }
+
+            e.preventDefault();
+
+            onEditTask({
+                "newDescription": textInput
+            });
+
+            setTextInput("");
+
+        },[onEditTask, textInput])
+
+
+        return (
+            <li onClick={onClick}>
+                {
+                    isInEditingState ? <form onSubmit={onSubmit}>
+                        <input autoFocus onChange={onChange} value={textInput} type="text"/>
+                    </form> : description
+                }
+            </li>
+        )
+    });
+
+    return {TaskComponent};
+})()
 
 
